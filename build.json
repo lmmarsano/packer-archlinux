@@ -1,0 +1,76 @@
+{ "description": "Arch Linux x64 LVM"
+, "variables": { "build": "lmmarsano/archx86-64"
+               , "version": "0.0.0"
+               , "token": ""
+               , "username": "vagrant"
+               , "password": "vagrant"
+               , "root_password": "vagrant"
+               , "locale": "en_US.UTF-8"
+               }
+, "builders": [{ "type": "virtualbox-iso"
+               , "guest_os_type": "ArchLinux_64"
+               , "iso_url": "http://mirror.vtti.vt.edu/archlinux/iso/latest/archlinux-2015.01.01-dual.iso"
+               , "iso_checksum": "b1bb42e2c89096687509e0b7b1bc84c3"
+               , "iso_checksum_type": "md5"
+               , "guest_additions_mode": "disable"
+               , "ssh_username": "root"
+               , "ssh_password": "{{user `root_password`}}"
+               , "ssh_wait_timeout": "1m20s"
+               , "disk_size": 40960
+               , "hard_drive_interface": "sata"
+               , "iso_interface": "sata"
+               , "ssh_host_port_min": 2200
+               , "ssh_host_port_max": 2250
+               , "vboxmanage": [[ "modifyvm"
+                                , "{{.Name}}"
+                                , "--firmware"
+                                , "efi"
+                                , "--accelerate3d"
+                                , "on"
+                                , "--rtcuseutc"
+                                , "on"
+                                , "--hpet"
+                                , "on"
+                                , "--cpuhotplug"
+                                , "on"
+                                , "--cpus"
+                                , "4"
+                                , "--nictype1"
+                                , "virtio"
+                                , "--usbehci"
+                                , "on"
+                                , "--clipboard"
+                                , "bidirectional"
+                                , "--draganddrop"
+                                , "hosttoguest"
+                                ]]
+               , "boot_wait": "5s"
+               , "boot_command": [ "<enter><wait10><wait10><wait10><wait10><wait5>"
+                                 , "chpasswd <<<\"root:{{user `root_password`}}\""
+                                 , "<enter>systemctl start sshd.service"
+                                 , "<enter><wait>"
+                                 ]
+               , "shutdown_command": "poweroff"
+               , "shutdown_timeout": "5s"
+               }]
+, "provisioners": [{ "type": "shell"
+                   , "script": "provision.sh"
+                   , "environment_vars": [ "username={{user `username`}}"
+                                         , "password={{user `password`}}"
+                                         , "root_password={{user `root_password`}}"
+                                         , "locale={{user `locale`}}"
+                                         ]
+                   }]
+, "post-processors": [[ { "type": "vagrant"
+                        , "compression_level": 9
+                        }
+                      , { "type": "vagrant-cloud"
+                        , "version_description": "initial"
+                        , "access_token": "{{user `token`}}"
+                        , "box_tag": "{{user `build`}}"
+                        , "version": "{{user `version`}}"
+                        , "no_release": true
+                        , "keep_input_artifact": true
+                        }
+                      ]]
+}

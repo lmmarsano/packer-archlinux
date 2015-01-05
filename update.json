@@ -1,0 +1,40 @@
+{ "description": "Arch Linux x64 LVM"
+, "variables": { "build": "lmmarsano/archx86-64"
+               , "source_path": "C:/Users/Luis/.vagrant.d/boxes/lmmarsano-VAGRANTSLASH-archx86-64/0/virtualbox/box.ovf"
+               , "version": "0.0.0"
+               , "token": ""
+               , "username": "root"
+               , "password": "vagrant"
+               }
+, "builders": [{ "type": "virtualbox-ovf"
+               , "source_path": "{{user `source_path`}}"
+               , "guest_additions_mode": "disable"
+               , "ssh_username": "{{user `username`}}"
+               , "ssh_password": "{{user `password`}}"
+               , "ssh_wait_timeout": "1m"
+               , "boot_wait": "25s"
+               , "boot_command": [ "root"
+                                 , "<enter>chpasswd <<<\"{{user `username`}}:{{user `password`}}\""
+                                 , "<enter><wait>"
+                                 ]
+               , "shutdown_command": "poweroff"
+               , "shutdown_timeout": "5s"
+               }]
+, "provisioners": [{ "type": "shell"
+                   , "scripts": [ "update.sh"
+                                , "clean.sh"
+                                ]
+                   }]
+, "post-processors": [[ { "type": "vagrant"
+                        , "compression_level": 9
+                        }
+                      , { "type": "vagrant-cloud"
+                        , "version_description": "update"
+                        , "access_token": "{{user `token`}}"
+                        , "box_tag": "{{user `build`}}"
+                        , "version": "{{user `version`}}"
+                        , "no_release": true
+                        , "keep_input_artifact": true
+                        }
+                      ]]
+}
